@@ -1,8 +1,8 @@
 #!/bin/zsh
 
 # Variables
-BINDIR="/home/bewniac/projects/bashrecon/bin"
-CWD="/home/bewniac/projects/bashrecon"
+BINDIR="$HOME/projects/bashrecon/bin"
+CWD="$HOME/projects/bashrecon"
 APT_DEPS="git make build-essential ruby ruby-dev unzip nmap jq chromium-browser"
 
 # clean
@@ -11,11 +11,11 @@ then
     echo "Cleaning up"
     rm -rf bin
     rm -rf nuclei-templates
-    rm -f /home/bewniac/go/bin/amass
-    rm -f /home/bewniac/go/bin/crobat
-    rm -f /home/bewniac/go/bin/subfinder
-    rm -f /home/bewniac/go/bin/httpx
-    rm -f /home/bewniac/go/bin/nuclei
+    rm -f $HOME/go/bin/amass
+    rm -f $HOME/go/bin/crobat
+    rm -f $HOME/go/bin/subfinder
+    rm -f $HOME/go/bin/httpx
+    rm -f $HOME/go/bin/nuclei
     sudo rm -f /usr/local/bin/massdns
 
     echo "Optionally, remove installed dependencies:"
