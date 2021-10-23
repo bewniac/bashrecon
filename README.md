@@ -14,3 +14,8 @@ docker build -t bashrecon .
 ```
 docker run -it bashrecon 
 ```
+
+## Todo
+ - Add altdns to find more subdomains
+ - Reporting tool for prettier results
+ - Other tools? 

@@ -60,22 +60,33 @@ cat $RESULTDIR/httpx.json | jq -r .url >> $RESULTDIR/webservers.txt
 
 # Nuclei 
 ./bin/nuclei -t / -l $RESULTDIR/webservers.txt -o $RESULTDIR/nuclei.json -json -silent -irr -r resolvers.txt & 
-./bin/nmap -v --top-ports 10000 -g 53 -Pn -sV -iL $RESULTDIR/ipv4.txt -oA $RESULTDIR/nmap & 
+./bin/nmap -v --top-ports 10000 -g 53 -sV -iL $RESULTDIR/ipv4.txt -oA $RESULTDIR/nmap & 
 
 # Wait until everything is done
 wait
 
 # TODO: Cleanup & parse nuclei result
-jq -c '."template-id", .info.severity, .info.name, ."curl-command"' $RESULTDIR/nuclei.json
+# jq -cr '."template-id", .info.severity, .info.name, ."curl-command"' $RESULTDIR/nuclei.json
+
+# Filter technologies based on match
+# jq -cr 'select(."template-id"=="tech-detect" ) as $result 
+#        | [$result.host, $result."matcher-name"]
+#        | @csv' nuclei.json
+
+# Filter out relevant data and export to CSV
+echo "name,host,severity,matcher-name" > nuclei.csv
+jq -cr '. as $result 
+        | [$result.info.name,$result.host,$result.info.severity,$result."matcher-name"] 
+        | @csv' nuclei.json | tr -d "\"" >> nuclei.csv
 
 # Get wordpress nuclei results
-jq -cr 'select(."matcher-name"=="wordpress") | .host' $RESULTDIR/nuclei.json 2>/dev/null | grep http | cut -d ":" -f 1-2 | sort | uniq >> wordpress.txt
+jq -cr 'select(."template-id" | contains("wordpress")) | .host' $RESULTDIR/nuclei.json 2>/dev/null | cut -d ":" -f 1-2 | sort | uniq >> $RESULTDIR/wordpress.txt
 
 # WPScan
 for url in `cat $RESULTDIR/wordpress.txt`;
 do
     FILENAME=`echo $url | cut -d "/" -f 3`
-    wpscan --rua -o $RESULTDIR/$FILENAME -e ap --disable-tls-checks --ignore-main-redirect --url $url
+    wpscan --rua -o $RESULTDIR/wpscan_$FILENAME -e ap --disable-tls-checks --ignore-main-redirect --url $url &
 done
 
 # Auquatone on nmap xml
